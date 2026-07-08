@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Do You Love Me?</title>
+  <title>Do You Love Me? ❤️</title>
   <script src="https://unpkg.com/gsap@3/dist/gsap.min.js"></script>
   <style>
     * {
@@ -16,7 +16,7 @@
     body {
       min-height: 100vh;
       overflow: hidden;
-      background: radial-gradient(circle at top, #1f1f2e, #0b0b14 70%);
+      background: radial-gradient(circle at top, #1b1b2a, #0a0a12 70%);
       display: flex;
       justify-content: center;
       align-items: center;
@@ -105,15 +105,17 @@
       letter-spacing: 1px;
       text-align: center;
       text-shadow: 0 0 18px rgba(255, 80, 130, 0.35);
+      z-index: 5;
     }
 
     .heart-wrap {
       position: relative;
-      width: 430px;
-      height: 430px;
+      width: 520px;
+      height: 520px;
       display: flex;
       justify-content: center;
       align-items: center;
+      perspective: 1000px;
     }
 
     .pulse-bg {
@@ -122,54 +124,79 @@
       height: 250px;
       border-radius: 50%;
       background: radial-gradient(circle, rgba(255, 70, 130, 0.28), transparent 70%);
-      filter: blur(15px);
-      z-index: -1;
+      filter: blur(18px);
+      z-index: -2;
       animation: pulseBg 2s infinite ease-in-out;
     }
 
     @keyframes pulseBg {
       0%, 100% {
         transform: scale(0.9);
-        opacity: 0.5;
+        opacity: 0.45;
       }
       50% {
-        transform: scale(1.2);
+        transform: scale(1.25);
         opacity: 1;
       }
     }
 
+    canvas {
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 1;
+    }
+
     svg {
+      position: absolute;
       width: 100%;
       height: 100%;
       overflow: visible;
-      filter: drop-shadow(0 0 20px rgba(255, 60, 120, 0.35))
-              drop-shadow(0 0 50px rgba(255, 60, 120, 0.2));
+      z-index: 2;
     }
 
-    .heart-outline {
-      fill: none;
-      stroke: rgba(255, 255, 255, 0.25);
-      stroke-width: 10;
-      stroke-linecap: round;
-      stroke-linejoin: round;
+    .wave {
+      fill: #ff6aa0;
+      opacity: 0;
+      transform-origin: 50% 50%;
+      filter: blur(3px);
+    }
+
+    .heart-shadow {
+      fill: rgba(255, 60, 130, 0.28);
+      filter: blur(18px);
+      opacity: 0;
     }
 
     .heart-fill {
       fill: url(#heartGradient);
-      opacity: 0.95;
+      opacity: 0;
       transform-origin: center;
-      filter: drop-shadow(0 0 18px rgba(255, 65, 129, 0.5));
+      filter:
+        drop-shadow(0 0 16px rgba(255, 70, 140, 0.45))
+        drop-shadow(0 0 35px rgba(255, 70, 140, 0.25));
+    }
+
+    .heart-highlight {
+      fill: rgba(255,255,255,0.28);
+      opacity: 0;
     }
 
     .spark {
-      fill: #ffd7e6;
-      opacity: 0.9;
+      position: absolute;
+      pointer-events: none;
+      z-index: 4;
+      font-size: 20px;
+      will-change: transform, opacity;
     }
 
-    .glow-ring {
-      fill: none;
-      stroke: rgba(255, 90, 150, 0.25);
-      stroke-width: 4;
+    .floating-heart {
+      position: absolute;
+      pointer-events: none;
+      z-index: 4;
+      font-size: 22px;
+      will-change: transform, opacity;
     }
 
     .hint {
@@ -178,7 +205,7 @@
       opacity: 0.8;
     }
 
-    @media (max-width: 600px) {
+    @media (max-width: 700px) {
       .question-box h1 {
         font-size: 2rem;
       }
@@ -196,8 +223,8 @@
       }
 
       .heart-wrap {
-        width: 320px;
-        height: 320px;
+        width: 340px;
+        height: 340px;
       }
 
       .love-text {
@@ -222,40 +249,66 @@
     </div>
 
     <div class="result" id="resultScreen">
-      <div class="heart-wrap">
+      <div class="heart-wrap" id="heartWrap">
         <div class="pulse-bg"></div>
 
+        <!-- dotted heart drawing -->
+        <canvas id="heartCanvas" width="520" height="520"></canvas>
+
+        <!-- final glossy heart + waves -->
         <svg viewBox="0 0 600 600" id="heartSvg">
           <defs>
             <linearGradient id="heartGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-              <stop offset="0%" stop-color="#ff7aa8" />
-              <stop offset="50%" stop-color="#ff3d7f" />
-              <stop offset="100%" stop-color="#d81b60" />
+              <stop offset="0%" stop-color="#ff9fc1" />
+              <stop offset="38%" stop-color="#ff5d97" />
+              <stop offset="100%" stop-color="#d91d67" />
             </linearGradient>
           </defs>
 
-          <circle class="glow-ring" cx="300" cy="300" r="110"></circle>
-          <circle class="glow-ring" cx="300" cy="300" r="150"></circle>
-
-          <path
-            id="heartPath"
-            class="heart-fill"
+          <!-- heart-shaped pulse waves -->
+          <path class="wave wave1"
             d="M300 500
                C 120 390, 70 230, 150 150
                C 210 90, 290 120, 300 190
                C 310 120, 390 90, 450 150
-               C 530 230, 480 390, 300 500 Z"
-          />
+               C 530 230, 480 390, 300 500 Z" />
 
-          <path
-            id="heartOutline"
-            class="heart-outline"
+          <path class="wave wave2"
             d="M300 500
                C 120 390, 70 230, 150 150
                C 210 90, 290 120, 300 190
                C 310 120, 390 90, 450 150
-               C 530 230, 480 390, 300 500 Z"
-          />
+               C 530 230, 480 390, 300 500 Z" />
+
+          <path class="wave wave3"
+            d="M300 500
+               C 120 390, 70 230, 150 150
+               C 210 90, 290 120, 300 190
+               C 310 120, 390 90, 450 150
+               C 530 230, 480 390, 300 500 Z" />
+
+          <!-- heart shadow behind -->
+          <path id="heartShadow" class="heart-shadow"
+            d="M300 500
+               C 120 390, 70 230, 150 150
+               C 210 90, 290 120, 300 190
+               C 310 120, 390 90, 450 150
+               C 530 230, 480 390, 300 500 Z" />
+
+          <!-- main heart -->
+          <path id="heartPath" class="heart-fill"
+            d="M300 500
+               C 120 390, 70 230, 150 150
+               C 210 90, 290 120, 300 190
+               C 310 120, 390 90, 450 150
+               C 530 230, 480 390, 300 500 Z" />
+
+          <!-- glossy highlight -->
+          <path id="heartHighlight" class="heart-highlight"
+            d="M248 170
+               C 200 145, 170 190, 178 235
+               C 185 275, 210 300, 230 315
+               C 190 255, 190 205, 248 170 Z" />
         </svg>
       </div>
 
@@ -269,8 +322,7 @@
     const buttonArea = document.getElementById("buttonArea");
     const questionBox = document.getElementById("questionBox");
     const resultScreen = document.getElementById("resultScreen");
-
-    let moveCount = 0;
+    const heartWrap = document.getElementById("heartWrap");
 
     function moveNoButton() {
       const areaRect = buttonArea.getBoundingClientRect();
@@ -282,13 +334,10 @@
       let randomX = Math.floor(Math.random() * maxX);
       let randomY = Math.floor(Math.random() * maxY);
 
-      // keep some distance from YES button area
       if (randomX < 120) randomX += 100;
 
       noBtn.style.left = randomX + "px";
       noBtn.style.top = randomY + "px";
-
-      moveCount++;
 
       gsap.fromTo(noBtn,
         { scale: 0.9, rotation: -8 },
@@ -296,7 +345,6 @@
       );
     }
 
-    // Make NO run away on hover and click/touch
     noBtn.addEventListener("mouseenter", moveNoButton);
     noBtn.addEventListener("click", (e) => {
       e.preventDefault();
@@ -329,110 +377,272 @@
     });
 
     function startHeartAnimation() {
-      const svg = document.getElementById("heartSvg");
+      const canvas = document.getElementById("heartCanvas");
+      const ctx = canvas.getContext("2d");
       const heart = document.getElementById("heartPath");
-      const outline = document.getElementById("heartOutline");
+      const heartShadow = document.getElementById("heartShadow");
+      const heartHighlight = document.getElementById("heartHighlight");
+      const svg = document.getElementById("heartSvg");
 
-      // heartbeat
-      gsap.timeline({ repeat: -1, repeatDelay: 0.15 })
-        .to(heart, {
-          scale: 1.08,
-          duration: 0.22,
-          ease: "power2.out",
-          transformOrigin: "50% 50%"
-        })
-        .to(heart, {
-          scale: 0.96,
-          duration: 0.18,
-          ease: "power2.inOut"
-        })
-        .to(heart, {
-          scale: 1.12,
-          duration: 0.22,
-          ease: "power2.out"
-        })
-        .to(heart, {
-          scale: 1,
-          duration: 0.35,
-          ease: "elastic.out(1, 0.45)"
+      const W = canvas.width;
+      const H = canvas.height;
+      const cx = W / 2;
+      const cy = H / 2 + 5;
+
+      // build dotted heart points
+      const points = [];
+      const totalPoints = 2300;
+
+      for (let i = 0; i < totalPoints; i++) {
+        const t = Math.random() * Math.PI * 2;
+        const x = 16 * Math.pow(Math.sin(t), 3);
+        const y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+
+        const scale = 11.2;
+        const spread = (Math.random() - 0.5) * 10;
+
+        const px = cx + x * scale + spread;
+        const py = cy + y * scale + spread;
+
+        points.push({
+          x: px,
+          y: py,
+          size: Math.random() * 2 + 1.2
         });
+      }
 
-      // outline draw
-      const length = outline.getTotalLength();
-      outline.style.strokeDasharray = length;
-      outline.style.strokeDashoffset = length;
+      // draw in order around heart
+      points.sort((a, b) => {
+        const aa = Math.atan2(a.y - cy, a.x - cx);
+        const bb = Math.atan2(b.y - cy, b.x - cx);
+        return aa - bb;
+      });
 
-      gsap.to(outline, {
-        strokeDashoffset: 0,
-        duration: 2.2,
+      const state = {
+        progress: 0,
+        beatScale: 1
+      };
+
+      function drawParticles() {
+        ctx.clearRect(0, 0, W, H);
+
+        ctx.save();
+        ctx.translate(cx, cy);
+        ctx.scale(state.beatScale, state.beatScale);
+        ctx.translate(-cx, -cy);
+
+        const visibleCount = Math.floor(points.length * state.progress);
+
+        for (let i = 0; i < visibleCount; i++) {
+          const p = points[i];
+          ctx.beginPath();
+          ctx.fillStyle = `rgba(255, ${140 + Math.random()*30}, ${185 + Math.random()*25}, 0.85)`;
+          ctx.shadowBlur = 8;
+          ctx.shadowColor = "rgba(255, 90, 150, 0.95)";
+          ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        ctx.restore();
+      }
+
+      let active = true;
+      function render() {
+        if (!active) return;
+        drawParticles();
+        requestAnimationFrame(render);
+      }
+      render();
+
+      // 1. draw dotted heart
+      gsap.to(state, {
+        progress: 1,
+        duration: 2.3,
         ease: "power2.out"
       });
 
-      // glow rings
-      gsap.to(".glow-ring", {
-        scale: 1.15,
-        opacity: 0.05,
-        duration: 1.5,
-        transformOrigin: "50% 50%",
-        stagger: {
-          each: 0.25,
-          repeat: -1,
-          yoyo: true
-        }
+      // 2. bring in glossy heart
+      gsap.delayedCall(2.0, () => {
+        gsap.to(heartShadow, {
+          opacity: 1,
+          duration: 0.8,
+          ease: "power2.out"
+        });
+
+        gsap.to(heart, {
+          opacity: 1,
+          duration: 0.85,
+          ease: "power2.out"
+        });
+
+        gsap.to(heartHighlight, {
+          opacity: 1,
+          duration: 0.85,
+          ease: "power2.out"
+        });
       });
 
-      // floating motion
-      gsap.to(svg, {
-        y: -8,
-        duration: 2.2,
-        repeat: -1,
-        yoyo: true,
-        ease: "sine.inOut"
-      });
-
-      // spark generator
-      function createSpark() {
-        const ns = "http://www.w3.org/2000/svg";
-        const spark = document.createElementNS(ns, "circle");
-
-        const angle = Math.random() * Math.PI * 2;
-        const radius = 80 + Math.random() * 80;
-        const cx = 300 + Math.cos(angle) * radius;
-        const cy = 280 + Math.sin(angle) * radius;
-
-        spark.setAttribute("cx", cx);
-        spark.setAttribute("cy", cy);
-        spark.setAttribute("r", 3 + Math.random() * 3);
-        spark.setAttribute("class", "spark");
-
-        svg.appendChild(spark);
-
-        gsap.fromTo(
-          spark,
-          {
-            scale: 0,
-            opacity: 0.9
-          },
-          {
-            y: -20 - Math.random() * 40,
-            x: (Math.random() - 0.5) * 30,
-            scale: 1.8,
-            opacity: 0,
-            duration: 1.6 + Math.random() * 1.2,
-            ease: "power1.out",
-            onComplete: () => spark.remove()
+      // 3. remove dotted heart completely
+      gsap.delayedCall(2.45, () => {
+        gsap.to(canvas, {
+          opacity: 0,
+          duration: 0.8,
+          ease: "power2.out",
+          onComplete: () => {
+            active = false;
+            canvas.style.display = "none";
           }
-        );
-      }
+        });
+      });
 
-      setInterval(createSpark, 180);
+      // 4. start beat + waves
+      gsap.delayedCall(2.6, () => {
+        startHeartbeat(heart, heartShadow, heartHighlight, svg, state);
+        createAmbientEffects();
+      });
 
       gsap.from(".love-text", {
         y: 25,
         opacity: 0,
         duration: 1,
-        delay: 0.2,
+        delay: 2.4,
         ease: "back.out(1.7)"
+      });
+
+      gsap.fromTo(".heart-wrap",
+        { scale: 0.88, rotationX: 8 },
+        {
+          scale: 1,
+          rotationX: 0,
+          duration: 1.4,
+          ease: "power3.out"
+        }
+      );
+    }
+
+    function startHeartbeat(heart, heartShadow, heartHighlight, svg, state) {
+      const waves = document.querySelectorAll(".wave");
+
+      // realistic double beat
+      const beat = gsap.timeline({ repeat: -1, repeatDelay: 0.55 });
+
+      beat.to([heart, heartShadow, heartHighlight, svg], {
+        scale: 1.06,
+        duration: 0.12,
+        ease: "power2.out",
+        transformOrigin: "50% 50%",
+        onUpdate: () => state.beatScale = gsap.getProperty(heart, "scale")
+      })
+      .to([heart, heartShadow, heartHighlight, svg], {
+        scale: 0.98,
+        duration: 0.08,
+        ease: "power2.inOut",
+        onUpdate: () => state.beatScale = gsap.getProperty(heart, "scale")
+      })
+      .to([heart, heartShadow, heartHighlight, svg], {
+        scale: 1.12,
+        duration: 0.16,
+        ease: "power2.out",
+        onUpdate: () => state.beatScale = gsap.getProperty(heart, "scale")
+      })
+      .to([heart, heartShadow, heartHighlight, svg], {
+        scale: 1,
+        duration: 0.34,
+        ease: "elastic.out(1, 0.45)",
+        onUpdate: () => state.beatScale = gsap.getProperty(heart, "scale")
+      });
+
+      // heart-shaped waves behind the heart
+      function pulseWave() {
+        waves.forEach((wave, i) => {
+          gsap.fromTo(wave,
+            {
+              scale: 0.92,
+              opacity: 0.28 - i * 0.05
+            },
+            {
+              scale: 1.25 + (i * 0.18),
+              opacity: 0,
+              duration: 0.95,
+              ease: "power2.out",
+              delay: i * 0.1,
+              transformOrigin: "50% 50%"
+            }
+          );
+        });
+      }
+
+      pulseWave();
+      setInterval(pulseWave, 900);
+
+      // subtle float
+      gsap.to(svg, {
+        y: -7,
+        duration: 2.1,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    }
+
+    function createAmbientEffects() {
+      setInterval(createSpark, 220);
+      setInterval(createFloatingHeart, 520);
+
+      gsap.to(".love-text", {
+        textShadow: "0 0 35px rgba(255,120,170,0.95), 0 0 60px rgba(255,70,130,0.35)",
+        duration: 1.1,
+        repeat: -1,
+        yoyo: true,
+        ease: "sine.inOut"
+      });
+    }
+
+    function createSpark() {
+      const spark = document.createElement("div");
+      spark.className = "spark";
+      spark.textContent = Math.random() > 0.5 ? "✨" : "💖";
+
+      const wrapRect = heartWrap.getBoundingClientRect();
+      const x = wrapRect.width / 2 + (Math.random() - 0.5) * 210;
+      const y = wrapRect.height / 2 + (Math.random() - 0.5) * 170;
+
+      spark.style.left = x + "px";
+      spark.style.top = y + "px";
+      spark.style.opacity = 1;
+      spark.style.transform = "translate(-50%, -50%) scale(0.4)";
+      heartWrap.appendChild(spark);
+
+      gsap.to(spark, {
+        x: (Math.random() - 0.5) * 70,
+        y: -25 - Math.random() * 55,
+        scale: 1.4,
+        opacity: 0,
+        duration: 1.4 + Math.random() * 0.8,
+        ease: "power1.out",
+        onComplete: () => spark.remove()
+      });
+    }
+
+    function createFloatingHeart() {
+      const heart = document.createElement("div");
+      heart.className = "floating-heart";
+      heart.textContent = ["❤️", "💗", "💕"][Math.floor(Math.random() * 3)];
+
+      const wrapRect = heartWrap.getBoundingClientRect();
+      heart.style.left = Math.random() * wrapRect.width + "px";
+      heart.style.top = (wrapRect.height - 35) + "px";
+      heart.style.opacity = Math.random() * 0.45 + 0.35;
+      heartWrap.appendChild(heart);
+
+      gsap.to(heart, {
+        y: -240 - Math.random() * 100,
+        x: (Math.random() - 0.5) * 110,
+        rotation: (Math.random() - 0.5) * 50,
+        opacity: 0,
+        duration: 4 + Math.random() * 2,
+        ease: "sine.out",
+        onComplete: () => heart.remove()
       });
     }
   </script>
